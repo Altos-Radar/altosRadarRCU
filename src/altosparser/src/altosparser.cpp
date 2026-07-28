@@ -23,8 +23,8 @@
 #include <tf/transform_broadcaster.h>
 #include <array>
 using namespace std;
-#define vrMax 60
-#define vrMin -60
+#define vrMax 60.05
+#define vrMin -60.05
 #define vStep 0.1
 #define mtiThr 3
 #define vAmbMax 44.98
@@ -114,11 +114,11 @@ float hist(vector<POINTCLOUD> pointCloudVec, float* histBuf, float yaw)
                      cos(pointCloudVec[i].point[j].azi + yaw);
                 if (vr > vrMax || vr < vrMin || isnan(vr)) continue;
                 ind = (vr - vrMin) / vStep;
-                if (vr <= 0) histBuf[ind]++;
+                histBuf[ind]++;
             }
         }
     }
-    return float((max_element(histBuf, histBuf + (int((vrMax - vrMin) / vStep))) - histBuf)) * vStep + vrMin;
+    return (float(max_element(histBuf, histBuf + (int((vrMax - vrMin) / vStep))) - histBuf) + 0.5) * vStep + vrMin;
 }
 
 void calPoint(vector<POINTCLOUD> pointCloudVec,pcl::PointCloud<pcl::PointXYZHSV>::Ptr cloud,float *rcsBuf,float *histBuf,
