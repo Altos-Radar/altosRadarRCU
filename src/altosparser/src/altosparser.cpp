@@ -43,8 +43,10 @@ struct RadarUnit
 };
 
 float rcsCal(float range, float azi, float snr, float* rcsBuf) {
-    int ind = (azi * 180 / PI + 60.1) * 10;
-    float rcs = powf32(range, 2.6f) * snr / 5.0e6f / rcsBuf[ind];
+    int ind = (azi * 180 / PI + 90.0) * 10;
+    if(ind < 0) ind = 0;
+    if(ind > 1800) ind = 1800;
+    float rcs = powf32(range, 2.62f) * snr / 5.0e6f / rcsBuf[ind];
 
     return rcs;
 }
@@ -144,8 +146,7 @@ void calPoint(vector<POINTCLOUD> pointCloudVec,pcl::PointCloud<pcl::PointXYZHSV>
                    cloudPoint.z = -cloudPoint.z - 2*dist2Grd;
                 }
                 cloudPoint.h = pointCloudVec[i].point[j].doppler; 
-                cloudPoint.s = pointCloudVec[i].point[j].snr;
-                //rcsCal(pointCloudVec[i].point[j].range,pointCloudVec[i].point[j].azi,pointCloudVec[i].point[j].snr,rcsBuf);
+                cloudPoint.s = 10 * log10(rcsCal(pointCloudVec[i].point[j].range, azi, pointCloudVec[i].point[j].snr,rcsBuf)); // RCS in dBsm
                 cloud->push_back(cloudPoint);
             }
         }
@@ -192,16 +193,16 @@ void calPoint(vector<POINTCLOUD> pointCloudVec,pcl::PointCloud<pcl::PointXYZHSV>
 int main(int argc, char** argv) {
     
     // read files for rcs calculation
-    float* rcsBuf = (float*)malloc(1201 * sizeof(float));
+    float* rcsBuf = (float*)malloc(1801 * sizeof(float));
     std::string package_path = ros::package::getPath("altosparser");
-    std::string file_path = package_path + "/data/rcs.dat";
+    std::string file_path = package_path + "/data/rcsV4.dat";
     FILE* fp_rcs = fopen(file_path.c_str(), "rb");
     if (fp_rcs == NULL)
     {
-        ROS_ERROR("[WARNING] data/rcs.dat not found in pwd [WARNING]\n");
+        ROS_ERROR("[ERROR] data/rcsV4.dat not found in altosparser package [ERROR]\n");
         return -1;
     } 
-    fread(rcsBuf, 1201, sizeof(float), fp_rcs);
+    fread(rcsBuf, 1801, sizeof(float), fp_rcs);
     fclose(fp_rcs);
 
     // ros Init
