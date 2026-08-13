@@ -46,7 +46,7 @@ float rcsCal(float range, float azi, float snr, float* rcsBuf) {
     int ind = (azi * 180 / PI + 90.0) * 10;
     if(ind < 0) ind = 0;
     if(ind > 1800) ind = 1800;
-    float rcs = powf32(range, 2.03f) * snr / 1.88e5f / rcsBuf[ind];
+    float rcs = powf32(range, 2.6f) * snr / 2.0e6f / rcsBuf[ind];
 
     return rcs;
 }
